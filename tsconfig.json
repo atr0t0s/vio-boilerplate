@@ -10,7 +10,7 @@
         "src/pages/*"
       ],
       "@router": [
-        "src/router/*"
+        "src/routes/*"
       ]
     },
     "target": "es6",

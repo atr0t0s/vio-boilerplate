@@ -5,7 +5,8 @@
   "main": "index.tsx",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc",
+    "dev": "webpack serve"
   },
   "author": "",
   "license": "ISC",

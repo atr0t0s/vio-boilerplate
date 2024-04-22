@@ -1,5 +1,5 @@
 import Vio from "../vio";
-import router from "./router";
+import routes from "./routes";
 import "./assets/style.css";
 
-Vio("app", router)
+Vio("app", routes)

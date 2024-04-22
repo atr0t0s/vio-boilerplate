@@ -1,13 +1,21 @@
 import Index from '../templates/index.html'
-import { View } from '../../vio/view'
 
-export default function view() {
-	const props = {
-		pageName: "Frontpage"
-	}
-	const binds = {
-		clientName: "clientName"
-	}
-
-	return View(Index, props, binds)
+export default {
+  template: Index,
+  data: {
+    pageName: "Homepage",
+  },
+  binds: {
+    clientName: "clientName"
+  },
+  methods: {
+    test() {
+      console.log("testng 1")
+    },
+    test2() {
+      console.log("testing 2")
+    }
+  },
+  mount: {
+  }
 }

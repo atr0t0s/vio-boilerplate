@@ -1,10 +1,17 @@
-function View(template: string, opts: any, binds: any) {
-	const viewFromTemplate = template.replace(
-    	/\{\{(.+?)\}\}/g,
-    	(match, tag) => opts[tag.trim()]
-	);
+function View({
+  template, data, binds, methods, mount
+}) {
+  const viewFromTemplate = template.toString().replace(
+    /\{\{(.+?)\}\}/g,
+    (match, tag) => data[tag.trim()]
+  );
 
-	return [viewFromTemplate, opts, binds]
+  return {
+    template: viewFromTemplate,
+    data: data,
+    binds:
+      binds
+  }
 }
 
 export { View }

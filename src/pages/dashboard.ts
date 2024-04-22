@@ -1,23 +1,32 @@
 import Dashboard from '../templates/dashboard.html'
-import { View } from '../../vio/view'
 
-export default function view() {
-  const props = {
+export default {
+  template: Dashboard,
+  data: {
     pageName: "Dashboard",
     clientName: "",
     age: 0
-  }
-
-  const binds = {
+  },
+  binds: {
     clientNameInput: {
-      bind: "keyup",
+      event: "keyup",
       update: "clientName"
     },
-    ageInput: {
-      bind: "keyup",
+    submitButton: {
+      event: "click",
+      input: "ageInput",
       update: "age"
+    },
+  },
+  methods: {
+    test(param: string) {
+      console.log(param)
+    },
+    test2() {
+      console.log("testing 2")
     }
+  },
+  mount() {
+    this.methods.test2()
   }
-
-  return View(Dashboard, props, binds)
 }
