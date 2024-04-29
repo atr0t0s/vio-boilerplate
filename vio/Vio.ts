@@ -1,4 +1,4 @@
-import { router } from './router'
+import { Router } from './VioRouter'
 import { VioDOM } from './VioDOM'
 
 class Vio {
@@ -15,7 +15,7 @@ class Vio {
   }
 
   loadRoute = () => {
-    const view = router(JSON.parse(this.routes))
+    const view = Router(JSON.parse(this.routes))
     this.view = view.template
     this.render(this.wrapper, this.view)
     this.formEventHandler(view.binds)
