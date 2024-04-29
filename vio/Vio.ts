@@ -1,8 +1,8 @@
 import { router } from './router'
-import { VirtualDOM } from './VioNode'
+import { VioDOM } from './VioDOM'
 
 class Vio {
-  virtualDOM: VirtualDOM | null
+  virtualDOM: VioDOM | null
   appNode: HTMLElement
   routes: string
   view: string
@@ -10,7 +10,7 @@ class Vio {
 
   constructor(name: string, routes: any) {
     this.wrapper = document.getElementById(name)!;
-    this.virtualDOM = new VirtualDOM(this.wrapper);
+    this.virtualDOM = new VioDOM(this.wrapper);
     this.routes = JSON.stringify(routes)
   }
 
@@ -26,7 +26,7 @@ class Vio {
       const vNode = this.virtualDOM.parseHTMLStringToVioNode(value);
 
       if (!this.virtualDOM) {
-        this.virtualDOM = new VirtualDOM(element);
+        this.virtualDOM = new VioDOM(element);
       }
 
       this.virtualDOM.render(vNode);
@@ -38,7 +38,7 @@ class Vio {
   update = (element: HTMLElement, value: string) => {
     if (element && element.attributes.getNamedItem("id").value) {
       if (!this.virtualDOM) {
-        this.virtualDOM = new VirtualDOM(element);
+        this.virtualDOM = new VioDOM(element);
       }
 
       element.innerHTML = '';
