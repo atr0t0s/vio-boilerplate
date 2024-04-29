@@ -36,21 +36,15 @@ class Vio {
   }
 
   update = (element: HTMLElement, value: string) => {
-    // Ensure wrapper is defined and has an ID attribute
     if (element && element.attributes.getNamedItem("id").value) {
-      // Check if this.virtualDOM is initialized
       if (!this.virtualDOM) {
-        // Initialize VirtualDOM instance with the wrapper element
         this.virtualDOM = new VirtualDOM(element);
       }
 
-      // Clear the existing content of the wrapper element
       element.innerHTML = '';
 
-      // Create a text node with the provided value
       const textNode = document.createTextNode(value);
 
-      // Append the text node to the wrapper element
       element.appendChild(textNode);
     } else {
       console.error('Wrapper element or its ID attribute is missing.');
