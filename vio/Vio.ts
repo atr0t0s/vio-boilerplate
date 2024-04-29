@@ -1,46 +1,63 @@
-import { prepare, render } from './renderer'
-import { router, directRoute } from './router'
+import { router } from './router'
+import { VirtualDOM } from './VioNode'
 
 class Vio {
-  base: HTMLElement | null
-  prepare: typeof prepare
-  render: typeof render
+  virtualDOM: VirtualDOM | null
+  appNode: HTMLElement
   routes: string
+  view: string
+  wrapper: HTMLElement
 
   constructor(name: string, routes: any) {
-    this.base = document.getElementById(name)
-    this.prepare = prepare
-    this.render = render
+    this.wrapper = document.getElementById(name)!;
+    this.virtualDOM = new VirtualDOM(this.wrapper);
     this.routes = JSON.stringify(routes)
-  }
-
-  prepareView = (view: string) => {
-    this.prepare(this.base, view)
-  }
-
-  show = () => {
-    this.render(this.base)
   }
 
   loadRoute = () => {
     const view = router(JSON.parse(this.routes))
-    this.prepareView(view.template)
-    this.show()
-    this.eventHandler(view.binds)
+    this.view = view.template
+    this.render(this.wrapper, this.view)
+    this.formEventHandler(view.binds)
   }
 
-  route = (routes: any, route: string) => {
-    const view = directRoute(routes, route)
-    this.prepareView(view)
+  render = (element: HTMLElement, value: string) => {
+    if (element && element.attributes.getNamedItem("id").value) {
+      const vNode = this.virtualDOM.parseHTMLStringToVioNode(value);
+
+      if (!this.virtualDOM) {
+        this.virtualDOM = new VirtualDOM(element);
+      }
+
+      this.virtualDOM.render(vNode);
+    } else {
+      console.error('Wrapper element or its ID attribute is missing.');
+    }
   }
 
-  // formHandler = (binds: any) => {
-  //   for (let bind in binds) {
-  //
-  //   }
-  // }
+  update = (element: HTMLElement, value: string) => {
+    // Ensure wrapper is defined and has an ID attribute
+    if (element && element.attributes.getNamedItem("id").value) {
+      // Check if this.virtualDOM is initialized
+      if (!this.virtualDOM) {
+        // Initialize VirtualDOM instance with the wrapper element
+        this.virtualDOM = new VirtualDOM(element);
+      }
 
-  eventHandler = (binds: any) => {
+      // Clear the existing content of the wrapper element
+      element.innerHTML = '';
+
+      // Create a text node with the provided value
+      const textNode = document.createTextNode(value);
+
+      // Append the text node to the wrapper element
+      element.appendChild(textNode);
+    } else {
+      console.error('Wrapper element or its ID attribute is missing.');
+    }
+  }
+
+  formEventHandler = (binds: any) => {
     for (let bind in binds) {
       let el = <HTMLInputElement>document.getElementById(bind)
       el?.addEventListener(binds[bind].event, (event) => {
@@ -53,7 +70,8 @@ class Vio {
         }
 
         if ("update" in binds[bind]) {
-          document.getElementById(binds[bind].update)!.innerHTML = el!.value
+          const element = document.getElementById(binds[bind].update)
+          this.update(element, el.value)
         }
       });
     }
