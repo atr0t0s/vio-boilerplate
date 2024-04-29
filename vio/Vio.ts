@@ -59,8 +59,13 @@ class Vio {
           return;
         }
 
-        if ("input" in binds[bind]) {
-          el = <HTMLInputElement>document.getElementById(binds[bind].input)
+        if ("inputs" in binds[bind]) {
+          for (let item in binds[bind].inputs) {
+            el = <HTMLInputElement>document.getElementById(binds[bind].inputs[item].input)
+            const element = document.getElementById(binds[bind].inputs[item].updates)
+            this.update(element, el.value)
+          }
+          return;
         }
 
         if ("update" in binds[bind]) {

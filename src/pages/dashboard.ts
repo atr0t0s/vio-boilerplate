@@ -8,14 +8,20 @@ export default {
     age: 0
   },
   binds: {
-    clientNameInput: {
-      event: "keyup",
-      update: "clientName"
-    },
     submitButton: {
       event: "click",
-      input: "ageInput",
-      update: "age"
+      inputs: [{
+        input: "ageInput",
+        updates: "age"
+      },
+      {
+        input: "clientNameInput",
+        updates: "clientName"
+      }],
+      update: [
+        "age",
+        "clientName"
+      ]
     },
   },
   methods: {
