@@ -18,7 +18,7 @@ class Vio {
     const view = Router(JSON.parse(this.routes))
     this.view = view.template
     this.render(this.wrapper, this.view)
-    this.formEventHandler(view.binds)
+    this.eventHandler(view.binds)
   }
 
   render = (element: HTMLElement, value: string) => {
@@ -51,7 +51,7 @@ class Vio {
     }
   }
 
-  formEventHandler = (binds: any) => {
+  eventHandler = (binds: any) => {
     for (let bind in binds) {
       let el = <HTMLInputElement>document.getElementById(bind)
       el?.addEventListener(binds[bind].event, (event) => {

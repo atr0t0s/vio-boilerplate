@@ -1,7 +1,11 @@
 import Dashboard from '../templates/dashboard.html'
+import ButtonComponent from '../components/Button.html'
 
 export default {
   template: Dashboard,
+  components: {
+    Button: ButtonComponent
+  },
   data: {
     pageName: "Dashboard",
     clientName: "",
@@ -18,10 +22,6 @@ export default {
         input: "clientNameInput",
         updates: "clientName"
       }],
-      update: [
-        "age",
-        "clientName"
-      ]
     },
   },
   methods: {
