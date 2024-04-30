@@ -1,10 +1,14 @@
 import Dashboard from '../templates/dashboard.html'
-import ButtonComponent from '../components/Button.html'
+import SubmitButton from '../components/SubmitButton.html'
+import InputName from '../components/InputName.html'
+import InputAge from '../components/InputAge.html'
 
 export default {
   template: Dashboard,
   components: {
-    Button: ButtonComponent
+    SumbitButton: SubmitButton,
+    ClientNameInput: InputName,
+    ClientAgeInput: InputAge
   },
   data: {
     pageName: "Dashboard",

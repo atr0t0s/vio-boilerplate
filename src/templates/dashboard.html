@@ -2,16 +2,7 @@
   <div class="container mx-auto">
     <h1 class="text-3xl font-bold underline">{{ pageName }}</h1>
     <a href="/#">Go to Front Page</a>
-    <div>
-      <span>Name: </span>
-      <span id="clientName">{{ clientName }}</span>
-      <input class="enabled:hover:border-gray-400 disabled:opacity-75" type="text" id="clientNameInput" /></span>
-    </div>
-    <div>
-      <span>Age:</span>
-      <span id="age">{{ age }}</span>
-      <span><input class="enabled:hover:border-gray-400 disabled:opacity-75" type="text" id="ageInput" /></span>
-      <Button id="submitButton" style="border:1px solid black;">Submit</Button>
-    </div>
+    <ClientNameInput />
+    <ClientAgeInput />
   </div>
 </template>
