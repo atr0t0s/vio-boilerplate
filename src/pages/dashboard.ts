@@ -1,12 +1,12 @@
-import Dashboard from '../templates/dashboard.html'
+import DashboardTemplate from '../templates/dashboard.html'
 import SubmitButton from '../components/SubmitButton.html'
 import InputName from '../components/InputName.html'
 import InputAge from '../components/InputAge.html'
 
-export default {
-  template: Dashboard,
+const Dashboard = {
+  template: DashboardTemplate,
   components: {
-    SumbitButton: SubmitButton,
+    SubmitButton: SubmitButton,
     ClientNameInput: InputName,
     ClientAgeInput: InputAge
   },
@@ -29,14 +29,13 @@ export default {
     },
   },
   methods: {
-    test(param: string) {
-      console.log(param)
-    },
-    test2() {
-      console.log("testing 2")
+    test() {
+      console.log("testing")
     }
   },
-  mount() {
-    this.methods.test2()
+  mount: () => {
+    Dashboard.methods.test()
   }
 }
+
+export default Dashboard

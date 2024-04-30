@@ -11,11 +11,11 @@ class Vio {
   constructor(name: string, routes: any) {
     this.wrapper = document.getElementById(name)!;
     this.virtualDOM = new VioDOM(this.wrapper);
-    this.routes = JSON.stringify(routes)
+    this.routes = { ...routes }
   }
 
   loadRoute = () => {
-    const view = Router(JSON.parse(this.routes))
+    const view = Router(this.routes)
     this.view = view.template
     this.render(this.wrapper, this.view)
     this.eventHandler(view.binds)

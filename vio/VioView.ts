@@ -6,6 +6,7 @@ export function View({
   methods,
   mount
 }) {
+  mount()
   return {
     template: template.toString().replace(
       /\{\{(.+?)\}\}/g,
