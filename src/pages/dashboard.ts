@@ -2,10 +2,12 @@ import DashboardTemplate from '../templates/dashboard.html'
 import SubmitButton from '../components/SubmitButton.html'
 import InputName from '../components/InputName.html'
 import InputAge from '../components/InputAge.html'
+import Nav from '../components/Navigation.html'
 
-const Dashboard = {
+export default {
   template: DashboardTemplate,
   components: {
+    Navigation: Nav,
     SubmitButton: SubmitButton,
     ClientNameInput: InputName,
     ClientAgeInput: InputAge
@@ -25,17 +27,19 @@ const Dashboard = {
       {
         input: "clientNameInput",
         updates: "clientName"
-      }],
+      }]
     },
   },
   methods: {
-    test() {
-      console.log("testing")
+    testing() {
+      this.testing2()
+    },
+    testing2() {
+      console.log(this.pageName)
     }
   },
-  mount: () => {
-    Dashboard.methods.test()
+  mount() {
+    this.testing()
+    console.log(this.pageName)
   }
 }
-
-export default Dashboard

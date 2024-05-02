@@ -1,12 +1,17 @@
 import { Router } from './VioRouter'
 import { VioDOM } from './VioDOM'
 
+interface ComponentInstance {
+  [key: string]: any
+}
+
 class Vio {
   virtualDOM: VioDOM | null
   appNode: HTMLElement
   routes: string
   view: string
   wrapper: HTMLElement
+  instance: ComponentInstance
 
   constructor(name: string, routes: any) {
     this.wrapper = document.getElementById(name)!;
@@ -15,13 +20,14 @@ class Vio {
   }
 
   loadRoute = () => {
-    const view = Router(this.routes)
-    this.view = view.template
-    this.render(this.wrapper, this.view)
-    this.eventHandler(view.binds)
+    const route = Router(this.routes)
+    this.instance = route.instance
+    this.view = route.view.template
+    this.loadView(this.wrapper, this.view)
+    this.eventHandler(route.view.binds)
   }
 
-  render = (element: HTMLElement, value: string) => {
+  loadView = (element: HTMLElement, value: string) => {
     if (element && element.attributes.getNamedItem("id").value) {
       const vNode = this.virtualDOM.parseHTMLStringToVioNode(value);
 

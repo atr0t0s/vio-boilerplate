@@ -6,7 +6,10 @@ export function View({
   methods,
   mount
 }) {
-  mount()
+  if (typeof mount === 'function') {
+    mount()
+  }
+
   return {
     template: template.toString().replace(
       /\{\{(.+?)\}\}/g,
@@ -18,7 +21,6 @@ export function View({
         const attrs = attributes || selfClosingAttributes || '';
         const component = components[tag.trim()];
 
-        // Pass content and attributes to the component
         return component.replace(
           '{{ content }}', content
         ).replace(
