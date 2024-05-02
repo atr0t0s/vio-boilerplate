@@ -1,5 +1,5 @@
-import Dashboard from "../pages/dashboard";
-import Index from "../pages/index";
+import Dashboard from "../views/pages/dashboard";
+import Index from "../views/pages/index";
 
 export default {
   "": Index,

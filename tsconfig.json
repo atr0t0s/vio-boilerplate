@@ -7,7 +7,7 @@
     "baseUrl": "src",
     "paths": {
       "@pages": [
-        "src/pages/*"
+        "src/components/*"
       ],
       "@router": [
         "src/routes/*"
