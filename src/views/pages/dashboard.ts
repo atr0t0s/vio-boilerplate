@@ -1,13 +1,13 @@
-import DashboardTemplate from '../templates/pages/dashboard.html'
-import SubmitButton from '../templates/components/SubmitButton.html'
-import InputName from '../templates/components/InputName.html'
-import InputAge from '../templates/components/InputAge.html'
-import Nav from '../templates/components/Navigation.html'
+import DashboardPage from '../templates/pages/dashboard.html'
+import SubmitButton from '../components/SubmitButton'
+import InputName from '../components/InputName'
+import InputAge from '../components/InputAge'
+import Navigation from '../components/Navigation'
 
 export default {
-  template: DashboardTemplate,
+  template: DashboardPage,
   components: {
-    Navigation: Nav,
+    Navigation: Navigation,
     SubmitButton: SubmitButton,
     ClientNameInput: InputName,
     ClientAgeInput: InputAge

@@ -1,10 +1,10 @@
 import Index from '../templates/pages/index.html'
-import Nav from '../templates/components/Navigation.html'
+import Navigation from '../components/Navigation'
 
 export default {
   template: Index,
   components: {
-    Navigation: Nav
+    Navigation: Navigation
   },
   data: {
     pageName: "Homepage",

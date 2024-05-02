@@ -7,7 +7,6 @@ export default {
     dashboard: "Dashboard",
     homeLink: "#",
     dashboardLink: "#dashboard",
-    pageName: "Homepage",
   },
   methods: {
     test() {
