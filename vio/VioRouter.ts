@@ -1,22 +1,38 @@
 import { View } from './VioView'
 
-export function Router(routes: any) {
+export function Router(routes: any, view = null) {
   const url = location.hash.slice(1);
-  const view = routes[url];
+  const route = routes[url];
+
+  if (view) {
+    route.data = view.data
+    route.mount = null
+  }
 
   const instance = {
-    ...view.data,
-    ...view.methods
+    ...route.components,
+    ...route.binds,
+    ...route.data,
+    ...route.methods
   }
 
-  view.mount = view.mount.bind(instance);
-
-  for (const key in view.methods) {
-    view.methods[key] = view.methods[key].bind(instance)
+  if (route.mount) {
+    route.mount = route.mount.bind(instance);
   }
+
+  for (const key in route.methods) {
+    instance[key] = route.methods[key].bind(instance);
+  }
+
+  for (const key in route.methods) {
+    route.methods[key] = route.methods[key].bind(instance)
+  }
+
+  instance.components = route.components
+  instance.id = route.id
 
   return {
-    view: View(view),
+    view: View(route),
     instance: instance
   }
 }

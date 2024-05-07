@@ -1,33 +1,61 @@
 import { Router } from './VioRouter'
 import { VioDOM } from './VioDOM'
 
-interface ComponentInstance {
+interface ComponentProperties {
   [key: string]: any
 }
 
+interface Route {
+  view: ComponentProperties;
+  instance: ComponentProperties;
+}
+
 class Vio {
-  virtualDOM: VioDOM | null
-  appNode: HTMLElement
-  routes: string
-  view: string
-  wrapper: HTMLElement
-  instance: ComponentInstance
+  private virtualDOM: VioDOM | null
+  private routes: string
+  private route: Route
+  private view: ComponentProperties
+  private template: string
+  private wrapper: HTMLElement
+  private instance: ComponentProperties[]
 
   constructor(name: string, routes: any) {
     this.wrapper = document.getElementById(name)!;
     this.virtualDOM = new VioDOM(this.wrapper);
     this.routes = { ...routes }
+    this.instance = []
   }
 
-  loadRoute = () => {
-    const route = Router(this.routes)
-    this.instance = route.instance
-    this.view = route.view.template
-    this.loadView(this.wrapper, this.view)
-    this.eventHandler(route.view.binds)
+  Render = () => {
+    this.route = Router(this.routes, this.view)
+
+    this.view = this.route.view
+
+    for (let key in this.view.data) {
+      this.view.data[key] = this.instance[this.route.instance.id][key]
+    }
+
+    this.template = this.route.view.template
+
+    this.Load(this.wrapper, this.template)
+    this.EventHandler(this.route.view.binds)
   }
 
-  loadView = (element: HTMLElement, value: string) => {
+  Route = () => {
+    this.route = Router(this.routes)
+
+    if (!this.instance[this.route.instance.id]) {
+      this.instance[this.route.instance.id] = this.route.instance
+    }
+
+    this.view = this.route.view
+    this.template = this.route.view.template
+
+    this.Load(this.wrapper, this.template)
+    this.EventHandler(this.route.view.binds)
+  }
+
+  Load = (element: HTMLElement, value: string) => {
     if (element && element.attributes.getNamedItem("id").value) {
       const vNode = this.virtualDOM.parseHTMLStringToVioNode(value);
 
@@ -41,7 +69,7 @@ class Vio {
     }
   }
 
-  update = (element: HTMLElement, value: string) => {
+  Update = (element: HTMLElement, value: string) => {
     if (element && element.attributes.getNamedItem("id").value) {
       if (!this.virtualDOM) {
         this.virtualDOM = new VioDOM(element);
@@ -57,7 +85,7 @@ class Vio {
     }
   }
 
-  eventHandler = (binds: any) => {
+  EventHandler = (binds: any) => {
     for (let bind in binds) {
       let el = <HTMLInputElement>document.getElementById(bind)
       el?.addEventListener(binds[bind].event, (event) => {
@@ -65,18 +93,30 @@ class Vio {
           return;
         }
 
+        if ("call" in binds[bind]) {
+          const methodName = binds[bind].call;
+          this.instance[this.route.instance.id][methodName].call(this.instance[this.route.instance.id]);
+
+          this.Render()
+
+          return;
+        }
+
         if ("inputs" in binds[bind]) {
           for (let item in binds[bind].inputs) {
             el = <HTMLInputElement>document.getElementById(binds[bind].inputs[item].input)
             const element = document.getElementById(binds[bind].inputs[item].updates)
-            this.update(element, el.value)
+            this.instance[this.route.instance.id][binds[bind].inputs[item].updates] = el.value
+            this.Update(element, el.value)
           }
+
           return;
         }
 
         if ("update" in binds[bind]) {
           const element = document.getElementById(binds[bind].update)
-          this.update(element, el.value)
+          this.instance[this.route.instance.id][binds[bind].update] = el.value
+          this.Update(element, el.value)
         }
       });
     }

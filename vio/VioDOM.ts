@@ -31,16 +31,12 @@ export class VioDOM {
   }
 
   parseHTMLStringToVioNode(htmlString: string): VioNode {
-    // Create a temporary container element to parse the HTML string
     const tempContainer = document.createElement('div');
     tempContainer.innerHTML = htmlString.trim();
 
-    // Extract the first child node of the container
     const firstChild = tempContainer.firstChild;
 
-    // Check if the first child node exists and is an HTMLElement
     if (firstChild instanceof HTMLElement) {
-      // Convert the HTMLElement to a VioNode object
       return this.convertHTMLElementToVioNode(firstChild);
     } else {
       throw new Error('Invalid HTML string: Unable to parse as HTMLElement');
@@ -63,14 +59,12 @@ export class VioDOM {
       return null;
     }
 
-    const updatedNode = { ...vNode }; // Shallow copy the current node
+    const updatedNode = { ...vNode };
 
-    // If the current node matches the ID, update its properties
     if (updatedNode.props.id === id) {
       updatedNode.props.textContent = newValue;
     }
 
-    // Recursively update children
     updatedNode.children = updatedNode.children.map(child => {
       if (child instanceof VioNode) {
         return this.updateElementInVirtualDOM(child, id, newValue);
@@ -82,12 +76,10 @@ export class VioDOM {
   }
 
   convertHTMLElementToVioNode(element: HTMLElement): VioNode {
-    // If the element is a <template> tag, extract its content
     if (element.tagName.toLowerCase() === 'template') {
       const templateContent = (element as HTMLTemplateElement).content;
       const children: Child[] = [];
 
-      // Convert child nodes inside the template content
       templateContent.childNodes.forEach(childNode => {
         if (childNode.nodeType === Node.ELEMENT_NODE) {
           children.push(this.convertHTMLElementToVioNode(childNode as HTMLElement));
@@ -96,21 +88,17 @@ export class VioDOM {
         }
       });
 
-      // Return a new VioNode representing the children of the template
       return new VioNode('div', {}, children);
     }
 
-    // For regular elements, parse attributes and child nodes as before
     const tag = element.tagName.toLowerCase();
 
-    // Extract props from attributes
     const props: Props = {};
     for (let i = 0; i < element.attributes.length; i++) {
       const attr = element.attributes[i];
       props[attr.nodeName] = attr.nodeValue;
     }
 
-    // Convert child nodes
     const children: Child[] = [];
     element.childNodes.forEach(childNode => {
       if (childNode.nodeType === Node.ELEMENT_NODE) {
@@ -122,9 +110,6 @@ export class VioDOM {
 
     return new VioNode(tag, props, children);
   }
-
-
-
 
   diff(oldVioNode: VioNode, newVioNode: VioNode): Patch[] {
     const patches: Patch[] = [];
@@ -138,16 +123,13 @@ export class VioDOM {
     if (oldNode.tag !== newNode.tag || typeof oldNode.tag !== typeof newNode.tag) {
       patches.push({ type: 'REPLACE', node: oldNode, newNode });
     } else if (typeof newNode.tag === 'string') {
-      // Diff props
       const propsPatches = this.diffProps(oldNode.props, newNode.props);
       if (Object.keys(propsPatches).length > 0) {
         patches.push({ type: 'PROPS', node: oldNode, props: propsPatches });
       }
 
-      // Diff children
       this.diffChildren(oldNode.children, newNode.children, patches, index);
     } else if (typeof newNode.tag === 'function') {
-      // Diff components
       this.diffComponent(oldNode, newNode, patches);
     }
   }
@@ -155,18 +137,17 @@ export class VioDOM {
   diffProps(oldProps: Props, newProps: Props): PropsPatch {
     const patches: PropsPatch = {};
 
-    // Find changed, added, and removed props
     for (let key in oldProps) {
       if (!(key in newProps)) {
-        patches[key] = null; // Property removed
+        patches[key] = null;
       } else if (oldProps[key] !== newProps[key]) {
-        patches[key] = newProps[key]; // Property changed
+        patches[key] = newProps[key];
       }
     }
 
     for (let key in newProps) {
       if (!(key in oldProps)) {
-        patches[key] = newProps[key]; // Property added
+        patches[key] = newProps[key];
       }
     }
 
@@ -174,7 +155,6 @@ export class VioDOM {
   }
 
   diffChildren(oldChildren: Child[], newChildren: Child[], patches: Patch[], parentIndex: number) {
-    // Calculate key map for efficient reconciliation
     const keyMap: { [key: string]: number } = {};
     oldChildren.forEach((child, index) => {
       if (child instanceof VioNode) {
@@ -183,7 +163,6 @@ export class VioDOM {
       }
     });
 
-    // Reconciliation using keys
     const newChildrenWithIndex: { child: Child, index: number }[] = [];
     newChildren.forEach((child, newIndex) => {
       const key = child instanceof VioNode && child.props.key || String(newIndex);
@@ -198,12 +177,10 @@ export class VioDOM {
       }
     });
 
-    // Remove old nodes
     Object.keys(keyMap).forEach(key => {
       patches.push({ type: 'REMOVE', index: keyMap[key] });
     });
 
-    // Move and insert new nodes
     let currentIndex = parentIndex;
     newChildrenWithIndex.forEach(({ child, index }) => {
       if (index === -1) {
@@ -215,7 +192,6 @@ export class VioDOM {
     });
   }
 
-
   updateInnerHTMLById(id: string, content: string | VioNode): void {
     if (!this.virtualDOM) {
       console.error('Virtual DOM is null. Make sure to call render method before updating.');
@@ -225,9 +201,8 @@ export class VioDOM {
     const foundNode = this.getElementById(this.virtualDOM, id);
 
     if (foundNode) {
-      // Assign the content directly to the children array
       foundNode.children = [content];
-      this.render(this.virtualDOM); // Re-render with updated changes
+      this.render(this.virtualDOM);
     } else {
       console.error(`Element with ID '${id}' not found in the virtual DOM.`);
     }
@@ -242,8 +217,8 @@ export class VioDOM {
     const foundNode = this.getElementById(this.virtualDOM, id);
 
     if (foundNode) {
-      foundNode.children = [vioNode]; // Assign the VioNode object directly
-      this.render(this.virtualDOM); // Re-render with updated changes
+      foundNode.children = [vioNode];
+      this.render(this.virtualDOM);
     } else {
       console.error(`Element with ID '${id}' not found in the virtual DOM.`);
     }
@@ -319,7 +294,6 @@ export class VioDOM {
   getElementsByTagName(vNode: VioNode, tagName: string): VioNode[] {
     const result: VioNode[] = [];
 
-    // Depth-first search to find nodes with the specified tag name
     function search(node: VioNode) {
       if (typeof node.tag === 'string' && node.tag.toLowerCase() === tagName.toLowerCase()) {
         result.push(node);
@@ -334,7 +308,6 @@ export class VioDOM {
     search(vNode);
     return result;
   }
-
 }
 
 type Patch =

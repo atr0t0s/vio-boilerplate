@@ -2,6 +2,7 @@ import Index from '../templates/pages/index.html'
 import Navigation from '../components/Navigation'
 
 export default {
+  id: "Home",
   template: Index,
   components: {
     Navigation: Navigation

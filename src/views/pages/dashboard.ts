@@ -5,6 +5,7 @@ import InputAge from '../components/InputAge'
 import Navigation from '../components/Navigation'
 
 export default {
+  id: "Dashboard",
   template: DashboardPage,
   components: {
     Navigation: Navigation,
@@ -29,17 +30,21 @@ export default {
         updates: "clientName"
       }]
     },
+    testingMethodCall: {
+      event: "click",
+      call: "testing",
+    }
   },
   methods: {
     testing() {
-      this.testing2()
+      this.pageName = "Testing"
+      this.age += 1
     },
-    testing2() {
-      console.log(this.pageName)
+    mount_test() {
+      console.log("Mount has been called successfully.")
     }
   },
   mount() {
-    this.testing()
-    console.log(this.pageName)
+    this.mount_test()
   }
 }

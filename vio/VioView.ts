@@ -3,10 +3,11 @@ export function View({
   components,
   data,
   binds,
+  methods,
   mount
 }: {
   template: Function;
-  components: Record<string, { template: string, data?: Record<string, any> }>; // Adjust the type definition
+  components: Record<string, { template: string, data?: Record<string, any> }>;
   data: Record<string, any>;
   binds: any;
   methods: any;
@@ -16,7 +17,6 @@ export function View({
     mount();
   }
 
-  // Create a new object to pass to child components, combining parent data and child-specific data
   const combinedData = { ...data };
 
   return {
@@ -31,10 +31,8 @@ export function View({
         const component = components[tag.trim()];
 
         if (component) {
-          // Get the component data or use an empty object as fallback
           const componentData = component.data || {};
 
-          // Pass parent and child data to the component template
           return component.template.replace(
             /\{\{content\}\}/g,
             content || ''
@@ -46,7 +44,6 @@ export function View({
             (match, tag) => (componentData[tag.trim()] || combinedData[tag.trim()]) || ''
           );
         } else {
-          // Otherwise, return the original HTML tag
           return match;
         }
       }
@@ -54,8 +51,9 @@ export function View({
       /\{\{(.+?)\}\}/g,
       (match, tag) => combinedData[tag.trim()] || ''
     ),
-    data: combinedData, // Pass the combined data to the returned object
-    binds: binds
+    data: combinedData,
+    binds: binds,
+    components: components,
+    methods: methods
   };
 }
-
