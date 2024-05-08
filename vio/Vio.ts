@@ -27,14 +27,11 @@ class Vio {
   }
 
   Render = () => {
-    this.route = Router(this.routes, this.view)
-
-    this.view = this.route.view
-
     for (let key in this.view.data) {
       this.view.data[key] = this.instance[this.route.instance.id][key]
     }
 
+    this.route = Router(this.routes, this.view)
     this.template = this.route.view.template
 
     this.Load(this.wrapper, this.template)
@@ -98,8 +95,6 @@ class Vio {
           this.instance[this.route.instance.id][methodName].call(this.instance[this.route.instance.id]);
 
           this.Render()
-
-          return;
         }
 
         if ("inputs" in binds[bind]) {

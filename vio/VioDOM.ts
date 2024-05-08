@@ -14,11 +14,11 @@ export class VioDOM {
       this.virtualDOM = newVirtualDOM;
     } else {
       const patches = this.diff(this.virtualDOM, newVirtualDOM);
+      console.log(patches)
       this.applyPatches(this.container, patches);
       this.virtualDOM = newVirtualDOM;
     }
 
-    // Render the new virtual DOM
     const renderedContent = this.virtualDOM.render();
     if (renderedContent instanceof HTMLElement) {
       this.container.innerHTML = '';
@@ -119,19 +119,44 @@ export class VioDOM {
     return patches;
   }
 
-  diffNode(oldNode: VioNode, newNode: VioNode, patches: Patch[], index = 0) {
+  diffNode(oldNode: VioNode, newNode: VioNode, patches: Patch[], index = 0, textNodeIndex = 0): number {
     if (oldNode.tag !== newNode.tag || typeof oldNode.tag !== typeof newNode.tag) {
       patches.push({ type: 'REPLACE', node: oldNode, newNode });
     } else if (typeof newNode.tag === 'string') {
       const propsPatches = this.diffProps(oldNode.props, newNode.props);
+
       if (Object.keys(propsPatches).length > 0) {
         patches.push({ type: 'PROPS', node: oldNode, props: propsPatches });
       }
 
-      this.diffChildren(oldNode.children, newNode.children, patches, index);
-    } else if (typeof newNode.tag === 'function') {
-      this.diffComponent(oldNode, newNode, patches);
+      index++;
+
+      if (typeof oldNode.children === 'string' && typeof newNode.children === 'string') {
+        if (oldNode.children !== newNode.children) {
+          patches.push({ type: 'TEXT', node: oldNode, textContent: newNode.children, textNodeIndex });
+        }
+        textNodeIndex++;
+      } else if (Array.isArray(oldNode.children) && Array.isArray(newNode.children)) {
+        textNodeIndex++;
+
+        for (let i = 0; i < Math.min(oldNode.children.length, newNode.children.length); i++) {
+          const oldChild = oldNode.children[i];
+          const newChild = newNode.children[i];
+
+          if (typeof oldChild === 'object' && typeof newChild === 'object') {
+            textNodeIndex = this.diffNode(oldChild, newChild, patches, index, textNodeIndex);
+          } else {
+            if (typeof oldChild === 'string' && typeof newChild === 'string' && oldChild !== newChild) {
+
+              patches.push({ type: 'TEXT', node: oldNode, textContent: newChild, textNodeIndex });
+              textNodeIndex++;
+            }
+          }
+        }
+      }
     }
+
+    return textNodeIndex;
   }
 
   diffProps(oldProps: Props, newProps: Props): PropsPatch {
@@ -154,42 +179,45 @@ export class VioDOM {
     return patches;
   }
 
-  diffChildren(oldChildren: Child[], newChildren: Child[], patches: Patch[], parentIndex: number) {
+  diffChildren(oldChildren: Child[], newChildren: Child[], patches: Patch[], parentIndex: number, textNodeIndex = 0): number {
     const keyMap: { [key: string]: number } = {};
+
     oldChildren.forEach((child, index) => {
       if (child instanceof VioNode) {
         const key = child.props.key || String(index);
         keyMap[key] = index;
-      }
-    });
-
-    const newChildrenWithIndex: { child: Child, index: number }[] = [];
-    newChildren.forEach((child, newIndex) => {
-      const key = child instanceof VioNode && child.props.key || String(newIndex);
-      const oldIndex = keyMap[key];
-      if (oldIndex != null) {
-        const oldChild = oldChildren[oldIndex];
-        newChildrenWithIndex.push({ child, index: oldIndex });
-        delete keyMap[key];
-        this.diffNode(oldChild instanceof VioNode ? oldChild : new VioNode('', {}, []), child instanceof VioNode ? child : new VioNode('', {}, []), patches, oldIndex);
-      } else {
-        newChildrenWithIndex.push({ child, index: -1 });
+        if (newChildren[index] instanceof VioNode) {
+          textNodeIndex = this.diffNode(child, newChildren[index] as VioNode, patches, parentIndex, textNodeIndex);
+        }
       }
     });
 
     Object.keys(keyMap).forEach(key => {
-      patches.push({ type: 'REMOVE', index: keyMap[key] });
+      if (!(key in newChildren)) {
+        patches.push({ type: 'REMOVE', index: keyMap[key] });
+      }
     });
 
     let currentIndex = parentIndex;
-    newChildrenWithIndex.forEach(({ child, index }) => {
-      if (index === -1) {
+    newChildren.forEach((child, newIndex) => {
+      const key = child instanceof VioNode ? child.props.key || String(newIndex) : String(newIndex);
+      const oldIndex = keyMap[key];
+      if (oldIndex != null) {
+        if (oldIndex !== currentIndex) {
+          patches.push({ type: 'MOVE', from: oldIndex, to: currentIndex });
+        }
+        currentIndex++;
+      } else {
         patches.push({ type: 'INSERT', node: child, index: currentIndex });
-      } else if (index !== currentIndex) {
-        patches.push({ type: 'MOVE', from: index, to: currentIndex });
+        currentIndex++;
       }
-      currentIndex++;
+
+      if (typeof child === 'string') {
+        textNodeIndex++;
+      }
     });
+
+    return textNodeIndex;
   }
 
   updateInnerHTMLById(id: string, content: string | VioNode): void {
@@ -241,22 +269,59 @@ export class VioDOM {
           this.applyPropsPatch(patch.node, patch.props);
           break;
         case 'REMOVE':
-          parent.removeChild(parent.childNodes[patch.index]);
+          if (parent.childNodes[patch.index]) {
+            parent.removeChild(parent.childNodes[patch.index]);
+          }
           break;
         case 'INSERT':
-          parent.appendChild(patch.node instanceof VioNode ? patch.node.render() as HTMLElement : document.createTextNode(String(patch.node)));
+          if (patch.node instanceof VioNode) {
+            parent.appendChild(patch.node.render() as HTMLElement);
+          } else {
+            parent.appendChild(document.createTextNode(String(patch.node)));
+          }
           break;
         case 'MOVE':
           const node = parent.childNodes[patch.from];
-          parent.removeChild(node);
-          parent.insertBefore(node, parent.childNodes[patch.to]);
+          if (node) {
+            parent.removeChild(node);
+            parent.insertBefore(node, parent.childNodes[patch.to]);
+          }
           break;
         case 'REPLACE':
           const newNode = patch.newNode.render();
-          parent.replaceChild(newNode, parent.childNodes[parent.childNodes.length - 1]);
+          if (newNode instanceof HTMLElement) {
+            parent.replaceChild(newNode, patch.node.render());
+          }
           break;
+        case 'TEXT':
+          if (patch.node instanceof VioNode) {
+            const textNodeIndex = patch.textNodeIndex;
+            const textNode = this.findTextNode(parent, textNodeIndex);
+            if (textNode) {
+              textNode.textContent = patch.textContent;
+            } else {
+              console.error('Text node not found for TEXT patch.');
+            }
+          }
+          break;
+        default:
+          console.error('Unknown patch type:', patch);
       }
     });
+  }
+
+  findTextNode(parent: Node, index: number): Text | null {
+    let count = 0;
+    const walker = document.createTreeWalker(parent, NodeFilter.SHOW_TEXT, null);
+    let currentNode = walker.nextNode();
+    while (currentNode) {
+      if (count === index) {
+        return currentNode as Text;
+      }
+      count++;
+      currentNode = walker.nextNode();
+    }
+    return null;
   }
 
   applyPropsPatch(node: VioNode, propsPatch: PropsPatch) {
@@ -315,6 +380,7 @@ type Patch =
   | { type: 'REMOVE', index: number }
   | { type: 'INSERT', node: Child, index: number }
   | { type: 'MOVE', from: number, to: number }
-  | { type: 'REPLACE', node: VioNode, newNode: VioNode };
+  | { type: 'REPLACE', node: VioNode, newNode: VioNode }
+  | { type: 'TEXT', node: VioNode, textContent: string, textNodeIndex: number };
 
 type PropsPatch = { [key: string]: any };
